@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual Environment
+.venv/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project specific
+.spec-workflow/
+
+# PyInstaller
+*.spec.bak
+
+# Database files (local user data)
+*.db
+*.db-shm
+*.db-wal
+backup/
+crash_log.txt

@@ -1,0 +1,17 @@
+# Windows 桌面待办事项应用 - 依赖列表
+# Python 3.11+
+
+PyQt6>=6.5.0
+PyQt6-Qt6>=6.5.0
+PyQt6-sip>=13.5.0
+
+# 数据库 (Python 内置 sqlite3，无需额外安装)
+
+# 打包工具
+pyinstaller>=6.0.0
+
+# Windows API 集成
+pywin32>=306
+
+# 图表支持 (统计视图)
+pyqtgraph>=0.13.0
