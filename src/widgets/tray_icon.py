@@ -6,6 +6,62 @@ from PyQt6.QtGui import QIcon, QAction, QPixmap, QPainter, QColor, QFont
 from PyQt6.QtCore import Qt, pyqtSignal
 
 
+# 托盘菜单独立样式（QMenu 作为顶层弹窗，不继承 QApplication 的 QSS）
+_TRAY_MENU_LIGHT = """
+QMenu {
+    background-color: #FFFFFF;
+    border: 1px solid #E0D8CB;
+    border-radius: 8px;
+    padding: 4px;
+}
+QMenu::item {
+    padding: 8px 24px;
+    color: #3A3A3A;
+    border-radius: 4px;
+}
+QMenu::item:selected {
+    background-color: #E8E0D5;
+}
+QMenu::separator {
+    height: 1px;
+    background-color: #E0D8CB;
+    margin: 4px 8px;
+}
+"""
+
+_TRAY_MENU_DARK = """
+QMenu {
+    background-color: #363B46;
+    border: 1px solid #424854;
+    border-radius: 8px;
+    padding: 4px;
+}
+QMenu::item {
+    padding: 8px 24px;
+    color: #E0DDD8;
+    border-radius: 4px;
+}
+QMenu::item:selected {
+    background-color: #464C58;
+}
+QMenu::separator {
+    height: 1px;
+    background-color: #424854;
+    margin: 4px 8px;
+}
+"""
+
+
+def _is_dark_mode() -> bool:
+    """检测当前是否深色模式"""
+    try:
+        from ..settings import AppSettings
+        settings = AppSettings()
+        return settings.get("dark_mode", False)
+    except Exception:
+        return False
+
+
 class TrayIcon(QSystemTrayIcon):
     """系统托盘图标类"""
 
@@ -52,6 +108,9 @@ class TrayIcon(QSystemTrayIcon):
     def _create_menu(self):
         """创建右键菜单"""
         menu = QMenu()
+
+        # 为菜单显式设置样式（QMenu 作为顶层弹窗不继承 QApplication QSS）
+        menu.setStyleSheet(_TRAY_MENU_DARK if _is_dark_mode() else _TRAY_MENU_LIGHT)
 
         # 显示主窗口
         show_action = QAction("显示主窗口", menu)

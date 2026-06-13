@@ -89,6 +89,7 @@ class MainWindow(QMainWindow):
         # 侧边栏（样式由全局 QSS #sidebar 控制）
         self.sidebar = QFrame()
         self.sidebar.setObjectName("sidebar")
+        self.sidebar.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
         self.sidebar.setFixedWidth(200)
 
         sidebar_layout = QVBoxLayout(self.sidebar)
@@ -121,6 +122,7 @@ class MainWindow(QMainWindow):
         for icon, text, index in nav_items:
             btn = QPushButton(f" {icon}  {text}")
             btn.setCheckable(True)
+            btn.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
             btn.clicked.connect(lambda checked, idx=index: self._switch_view(idx))
             sidebar_layout.addWidget(btn)
             self.nav_buttons.append(btn)
@@ -130,11 +132,13 @@ class MainWindow(QMainWindow):
         # 添加任务按钮（样式由全局 QSS #addTaskBtn 控制）
         add_btn = QPushButton("  ➕  添加任务")
         add_btn.setObjectName("addTaskBtn")
+        add_btn.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
         add_btn.clicked.connect(self._add_task)
         sidebar_layout.addWidget(add_btn)
 
         # 设置按钮（继承 #sidebar QPushButton 样式）
         settings_btn = QPushButton("  ⚙️  设置")
+        settings_btn.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
         settings_btn.clicked.connect(self._show_settings)
         sidebar_layout.addWidget(settings_btn)
 
@@ -143,6 +147,7 @@ class MainWindow(QMainWindow):
         # 主内容区（样式由全局 QSS #content 控制）
         self.content_stack = QStackedWidget()
         self.content_stack.setObjectName("content")
+        self.content_stack.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
         main_layout.addWidget(self.content_stack)
 
         # 设置比例

@@ -13,6 +13,16 @@ from .priority_badge import PriorityBadge
 from ..utils.helpers import get_relative_date, format_time, is_overdue
 
 
+def _is_dark_mode() -> bool:
+    """检测当前是否深色模式"""
+    try:
+        from ..settings import AppSettings
+        settings = AppSettings()
+        return settings.get("dark_mode", False)
+    except Exception:
+        return False
+
+
 class TaskCard(QWidget):
     """任务卡片组件"""
 
@@ -32,6 +42,8 @@ class TaskCard(QWidget):
         self.setObjectName("taskCard")
         self.setMinimumHeight(80)
         self.setCursor(Qt.CursorShape.PointingHandCursor)
+
+        dark = _is_dark_mode()
 
         # 主布局
         main_layout = QHBoxLayout(self)
@@ -80,18 +92,21 @@ class TaskCard(QWidget):
         content_layout.addLayout(top_layout)
 
         # 描述行（如果有描述）
+        desc_color = "#AAAAAA" if dark else "#888888"
         self._desc_label = None
         if self._task.description and self._task.description.strip():
             self._desc_label = QLabel(self._task.description)
             self._desc_label.setFont(QFont("Segoe UI", 10))
-            self._desc_label.setStyleSheet("color: #999;")
+            self._desc_label.setStyleSheet(f"color: {desc_color};")
             self._desc_label.setWordWrap(True)
-            self._desc_label.setMaximumHeight(32)  # 最多2行
+            self._desc_label.setMaximumHeight(32)
             content_layout.addWidget(self._desc_label)
 
         # 底部行：日期时间和分类
         bottom_layout = QHBoxLayout()
         bottom_layout.setSpacing(12)
+
+        meta_color = "#999999" if dark else "#888888"
 
         # 截止日期
         if self._task.due_date:
@@ -100,15 +115,17 @@ class TaskCard(QWidget):
                 date_text += f" {format_time(self._task.due_time)}"
 
             self._date_label = QLabel(date_text)
-            self._date_label.setStyleSheet("color: #888; font-size: 11px;")
+            self._date_label.setStyleSheet(f"color: {meta_color}; font-size: 11px;")
             bottom_layout.addWidget(self._date_label)
 
         # 分类
         if self._task.category:
+            cat_bg = "#424854" if dark else "#E0E0E0"
+            cat_fg = "#B0ADA5" if dark else "#666666"
             self._category_label = QLabel(self._task.category)
-            self._category_label.setStyleSheet("""
-                background-color: #E0E0E0;
-                color: #666;
+            self._category_label.setStyleSheet(f"""
+                background-color: {cat_bg};
+                color: {cat_fg};
                 padding: 2px 8px;
                 border-radius: 8px;
                 font-size: 10px;
@@ -118,7 +135,7 @@ class TaskCard(QWidget):
         # 状态
         status_text = self._task.status_name
         self._status_label = QLabel(status_text)
-        self._status_label.setStyleSheet("color: #888; font-size: 11px;")
+        self._status_label.setStyleSheet(f"color: {meta_color}; font-size: 11px;")
         bottom_layout.addWidget(self._status_label)
 
         bottom_layout.addStretch()

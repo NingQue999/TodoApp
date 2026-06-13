@@ -8,6 +8,16 @@ from PyQt6.QtGui import QColor, QPainter, QBrush
 from ..models import Priority
 
 
+def _is_dark_mode() -> bool:
+    """检测当前是否深色模式"""
+    try:
+        from ..settings import AppSettings
+        settings = AppSettings()
+        return settings.get("dark_mode", False)
+    except Exception:
+        return False
+
+
 class PriorityBadge(QWidget):
     """优先级徽章组件"""
 
@@ -36,7 +46,8 @@ class PriorityBadge(QWidget):
 
     def _update_display(self):
         """更新显示"""
-        color = self._priority.color
+        dark = _is_dark_mode()
+        color = self._priority.dark_color if dark else self._priority.color
         name = self._priority.display_name
 
         self._dot.setStyleSheet(f"""
@@ -58,11 +69,12 @@ class PriorityBadge(QWidget):
 
     def paintEvent(self, event):
         """绘制背景"""
+        dark = _is_dark_mode()
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
 
         # 绘制圆角背景
-        color = QColor(self._priority.color)
+        color = QColor(self._priority.dark_color if dark else self._priority.color)
         color.setAlpha(30)
         painter.setBrush(QBrush(color))
         painter.setPen(Qt.PenStyle.NoPen)

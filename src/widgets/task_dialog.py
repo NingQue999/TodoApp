@@ -12,6 +12,147 @@ from PyQt6.QtGui import QFont
 from ..models import Task, Priority, TaskStatus
 
 
+def _is_dark_mode() -> bool:
+    """检测当前是否深色模式"""
+    try:
+        from ..settings import AppSettings
+        return AppSettings().get("dark_mode", False)
+    except Exception:
+        return False
+
+
+# 浅色/深色对话框样式
+_DIALOG_LIGHT = """
+QDialog {
+    background-color: #F5F0EB;
+    color: #3A3A3A;
+}
+QGroupBox {
+    border: 1px solid #E0D8CB;
+    border-radius: 8px;
+    margin-top: 12px;
+    padding-top: 16px;
+    font-weight: bold;
+    color: #3A3A3A;
+}
+QGroupBox::title {
+    subcontrol-origin: margin;
+    left: 12px;
+    padding: 0 6px;
+}
+QLabel { color: #3A3A3A; }
+QLineEdit, QTextEdit {
+    background-color: #FFFFFF;
+    border: 1px solid #D5CCC0;
+    border-radius: 6px;
+    padding: 8px;
+    color: #3A3A3A;
+}
+QLineEdit:focus, QTextEdit:focus { border-color: #5B8DB8; }
+QComboBox {
+    background-color: #FFFFFF;
+    border: 1px solid #D5CCC0;
+    border-radius: 6px;
+    padding: 6px 12px;
+    color: #3A3A3A;
+}
+QComboBox QAbstractItemView {
+    background-color: #FFFFFF;
+    border: 1px solid #D5CCC0;
+    selection-background-color: #D9CDBF;
+    color: #3A3A3A;
+}
+QDateEdit, QTimeEdit {
+    background-color: #FFFFFF;
+    border: 1px solid #D5CCC0;
+    border-radius: 6px;
+    padding: 6px;
+    color: #3A3A3A;
+}
+QRadioButton { spacing: 8px; color: #3A3A3A; }
+QRadioButton::indicator {
+    width: 16px; height: 16px; border-radius: 8px;
+    border: 2px solid #B8ADA0; background-color: #FFFFFF;
+}
+QRadioButton::indicator:checked { border-color: #5B8DB8; background-color: #5B8DB8; }
+QPushButton {
+    background-color: #5B8DB8;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-size: 13px;
+}
+QPushButton:hover { background-color: #4A7DA8; }
+QPushButton:pressed { background-color: #3D6D95; }
+"""
+
+_DIALOG_DARK = """
+QDialog {
+    background-color: #2D3139;
+    color: #E0DDD8;
+}
+QGroupBox {
+    border: 1px solid #424854;
+    border-radius: 8px;
+    margin-top: 12px;
+    padding-top: 16px;
+    font-weight: bold;
+    color: #E0DDD8;
+}
+QGroupBox::title {
+    subcontrol-origin: margin;
+    left: 12px;
+    padding: 0 6px;
+}
+QLabel { color: #E0DDD8; }
+QLineEdit, QTextEdit {
+    background-color: #3D424D;
+    border: 1px solid #4D5462;
+    border-radius: 6px;
+    padding: 8px;
+    color: #E0DDD8;
+}
+QLineEdit:focus, QTextEdit:focus { border-color: #6BA3C7; }
+QComboBox {
+    background-color: #3D424D;
+    border: 1px solid #4D5462;
+    border-radius: 6px;
+    padding: 6px 12px;
+    color: #E0DDD8;
+}
+QComboBox QAbstractItemView {
+    background-color: #3D424D;
+    border: 1px solid #4D5462;
+    selection-background-color: #464C58;
+    color: #E0DDD8;
+}
+QDateEdit, QTimeEdit {
+    background-color: #3D424D;
+    border: 1px solid #4D5462;
+    border-radius: 6px;
+    padding: 6px;
+    color: #E0DDD8;
+}
+QRadioButton { spacing: 8px; color: #E0DDD8; }
+QRadioButton::indicator {
+    width: 16px; height: 16px; border-radius: 8px;
+    border: 2px solid #5D6472; background-color: #3D424D;
+}
+QRadioButton::indicator:checked { border-color: #6BA3C7; background-color: #6BA3C7; }
+QPushButton {
+    background-color: #4F6D8C;
+    color: #E0DDD8;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-size: 13px;
+}
+QPushButton:hover { background-color: #5B7FA3; }
+QPushButton:pressed { background-color: #44607D; }
+"""
+
+
 class TaskDialog(QDialog):
     """任务新建/编辑对话框"""
 
@@ -20,6 +161,9 @@ class TaskDialog(QDialog):
         self._task = task
         self._categories = categories or ["默认", "工作", "学习", "生活"]
         self._result_task = None
+
+        # 显式设置对话框样式，确保背景色生效
+        self.setStyleSheet(_DIALOG_DARK if _is_dark_mode() else _DIALOG_LIGHT)
 
         self._setup_ui()
 
@@ -73,7 +217,8 @@ class TaskDialog(QDialog):
         # 无日期按钮
         self._no_date_btn = QPushButton("无")
         self._no_date_btn.setFixedWidth(40)
-        self._no_date_btn.clicked.connect(lambda: self._date_edit.setEnabled(not self._date_edit.isEnabled()))
+        self._no_date_btn.setCheckable(True)
+        self._no_date_btn.clicked.connect(self._toggle_date)
 
         # 时间
         time_label = QLabel("时间:")
@@ -84,7 +229,8 @@ class TaskDialog(QDialog):
         # 无时间按钮
         self._no_time_btn = QPushButton("无")
         self._no_time_btn.setFixedWidth(40)
-        self._no_time_btn.clicked.connect(lambda: self._time_edit.setEnabled(not self._time_edit.isEnabled()))
+        self._no_time_btn.setCheckable(True)
+        self._no_time_btn.clicked.connect(self._toggle_time)
 
         datetime_layout.addWidget(date_label)
         datetime_layout.addWidget(self._date_edit)
@@ -182,12 +328,16 @@ class TaskDialog(QDialog):
         if task.due_date:
             self._date_edit.setDate(QDate(task.due_date.year, task.due_date.month, task.due_date.day))
         else:
-            self._date_edit.setEnabled(False)
+            # 无截止日期 — 模拟点击"无"按钮
+            self._no_date_btn.setChecked(True)
+            self._toggle_date()
 
         if task.due_time:
             self._time_edit.setTime(QTime(task.due_time.hour, task.due_time.minute))
         else:
-            self._time_edit.setEnabled(False)
+            # 无截止时间 — 模拟点击"无"按钮
+            self._no_time_btn.setChecked(True)
+            self._toggle_time()
 
         # 设置优先级
         for btn in self._priority_group.buttons():
@@ -201,6 +351,44 @@ class TaskDialog(QDialog):
             self._category_combo.setCurrentIndex(index)
         else:
             self._category_combo.setCurrentText(task.category)
+
+    def _toggle_date(self):
+        """切换日期设置 — 禁用时灰显并显示提示"""
+        disabled = self._no_date_btn.isChecked()
+        self._date_edit.setEnabled(not disabled)
+        dark = _is_dark_mode()
+        if disabled:
+            bg = "#3A3A3A" if dark else "#E0E0E0"
+            fg = "#777777" if dark else "#999999"
+            border = "#4D5462" if dark else "#B8ADA0"
+            self._date_edit.setStyleSheet(
+                f"background-color: {bg}; color: {fg}; border: 1px dashed {border}; border-radius: 6px; padding: 6px;"
+            )
+            self._date_edit.setDisplayFormat("无截止日期")
+            self._date_edit.setDate(QDate(2000, 1, 1))
+        else:
+            self._date_edit.setStyleSheet("")
+            self._date_edit.setDisplayFormat("yyyy-MM-dd")
+            self._date_edit.setDate(QDate.currentDate())
+
+    def _toggle_time(self):
+        """切换时间设置 — 禁用时灰显并显示提示"""
+        disabled = self._no_time_btn.isChecked()
+        self._time_edit.setEnabled(not disabled)
+        dark = _is_dark_mode()
+        if disabled:
+            bg = "#3A3A3A" if dark else "#E0E0E0"
+            fg = "#777777" if dark else "#999999"
+            border = "#4D5462" if dark else "#B8ADA0"
+            self._time_edit.setStyleSheet(
+                f"background-color: {bg}; color: {fg}; border: 1px dashed {border}; border-radius: 6px; padding: 6px;"
+            )
+            self._time_edit.setDisplayFormat("无截止时间")
+            self._time_edit.setTime(QTime(0, 0))
+        else:
+            self._time_edit.setStyleSheet("")
+            self._time_edit.setDisplayFormat("HH:mm")
+            self._time_edit.setTime(QTime(23, 59))
 
     def _on_save(self):
         """保存"""

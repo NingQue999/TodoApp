@@ -334,6 +334,30 @@ QMessageBox QPushButton {
     min-width: 80px;
 }
 
+/* 右键菜单 */
+QMenu {
+    background-color: #FFFFFF;
+    border: 1px solid #E0D8CB;
+    border-radius: 8px;
+    padding: 4px;
+}
+
+QMenu::item {
+    padding: 8px 24px;
+    color: #3A3A3A;
+    border-radius: 4px;
+}
+
+QMenu::item:selected {
+    background-color: #E8E0D5;
+}
+
+QMenu::separator {
+    height: 1px;
+    background-color: #E0D8CB;
+    margin: 4px 8px;
+}
+
 /* SpinBox */
 QSpinBox, QDoubleSpinBox {
     background-color: #FFFFFF;
@@ -674,6 +698,30 @@ QMessageBox {
 
 QMessageBox QPushButton {
     min-width: 80px;
+}
+
+/* 右键菜单 */
+QMenu {
+    background-color: #363B46;
+    border: 1px solid #424854;
+    border-radius: 8px;
+    padding: 4px;
+}
+
+QMenu::item {
+    padding: 8px 24px;
+    color: #E0DDD8;
+    border-radius: 4px;
+}
+
+QMenu::item:selected {
+    background-color: #464C58;
+}
+
+QMenu::separator {
+    height: 1px;
+    background-color: #424854;
+    margin: 4px 8px;
 }
 
 /* SpinBox */

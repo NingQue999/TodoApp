@@ -14,12 +14,188 @@ from ..settings import AppSettings, set_startup_enabled
 from ..utils.theme import apply_theme
 
 
+def _is_dark_mode() -> bool:
+    """检测当前是否深色模式"""
+    try:
+        return AppSettings().get("dark_mode", False)
+    except Exception:
+        return False
+
+
+# 浅色/深色设置对话框样式
+_SETTINGS_LIGHT = """
+QDialog {
+    background-color: #F5F0EB;
+    color: #3A3A3A;
+}
+QLabel { color: #3A3A3A; }
+QGroupBox {
+    border: 1px solid #E0D8CB;
+    border-radius: 8px;
+    margin-top: 12px;
+    padding-top: 16px;
+    font-weight: bold;
+    color: #3A3A3A;
+}
+QGroupBox::title {
+    subcontrol-origin: margin;
+    left: 12px;
+    padding: 0 6px;
+}
+QComboBox {
+    background-color: #FFFFFF;
+    border: 1px solid #D5CCC0;
+    border-radius: 6px;
+    padding: 6px 12px;
+    color: #3A3A3A;
+}
+QComboBox QAbstractItemView {
+    background-color: #FFFFFF;
+    border: 1px solid #D5CCC0;
+    selection-background-color: #D9CDBF;
+    color: #3A3A3A;
+}
+QSpinBox {
+    background-color: #FFFFFF;
+    border: 1px solid #D5CCC0;
+    border-radius: 6px;
+    padding: 4px 8px;
+    color: #3A3A3A;
+}
+QCheckBox { spacing: 8px; color: #3A3A3A; }
+QCheckBox::indicator {
+    width: 18px; height: 18px; border-radius: 4px;
+    border: 2px solid #B8ADA0; background-color: #FFFFFF;
+}
+QCheckBox::indicator:checked { background-color: #7BA87B; border-color: #7BA87B; }
+QTabWidget::pane {
+    border: 1px solid #E0D8CB;
+    border-radius: 8px;
+    background-color: #FFFFFF;
+}
+QTabBar::tab {
+    background-color: #F0EBE3;
+    border: 1px solid #E0D8CB;
+    padding: 8px 16px;
+    margin-right: 2px;
+    color: #5A5046;
+}
+QTabBar::tab:selected {
+    background-color: #FFFFFF;
+    border-bottom: 2px solid #5B8DB8;
+    color: #3A3A3A;
+}
+QPushButton {
+    background-color: #5B8DB8;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-size: 13px;
+}
+QPushButton:hover { background-color: #4A7DA8; }
+QPushButton:pressed { background-color: #3D6D95; }
+QTimeEdit {
+    background-color: #FFFFFF;
+    border: 1px solid #D5CCC0;
+    border-radius: 6px;
+    padding: 6px;
+    color: #3A3A3A;
+}
+"""
+
+_SETTINGS_DARK = """
+QDialog {
+    background-color: #2D3139;
+    color: #E0DDD8;
+}
+QLabel { color: #E0DDD8; }
+QGroupBox {
+    border: 1px solid #424854;
+    border-radius: 8px;
+    margin-top: 12px;
+    padding-top: 16px;
+    font-weight: bold;
+    color: #E0DDD8;
+}
+QGroupBox::title {
+    subcontrol-origin: margin;
+    left: 12px;
+    padding: 0 6px;
+}
+QComboBox {
+    background-color: #3D424D;
+    border: 1px solid #4D5462;
+    border-radius: 6px;
+    padding: 6px 12px;
+    color: #E0DDD8;
+}
+QComboBox QAbstractItemView {
+    background-color: #3D424D;
+    border: 1px solid #4D5462;
+    selection-background-color: #464C58;
+    color: #E0DDD8;
+}
+QSpinBox {
+    background-color: #3D424D;
+    border: 1px solid #4D5462;
+    border-radius: 6px;
+    padding: 4px 8px;
+    color: #E0DDD8;
+}
+QCheckBox { spacing: 8px; color: #E0DDD8; }
+QCheckBox::indicator {
+    width: 18px; height: 18px; border-radius: 4px;
+    border: 2px solid #5D6472; background-color: #3D424D;
+}
+QCheckBox::indicator:checked { background-color: #7BA87B; border-color: #7BA87B; }
+QTabWidget::pane {
+    border: 1px solid #424854;
+    border-radius: 8px;
+    background-color: #2D3139;
+}
+QTabBar::tab {
+    background-color: #363B46;
+    border: 1px solid #424854;
+    padding: 8px 16px;
+    margin-right: 2px;
+    color: #B0ADA5;
+}
+QTabBar::tab:selected {
+    background-color: #2D3139;
+    border-bottom: 2px solid #6BA3C7;
+    color: #E0DDD8;
+}
+QPushButton {
+    background-color: #4F6D8C;
+    color: #E0DDD8;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-size: 13px;
+}
+QPushButton:hover { background-color: #5B7FA3; }
+QPushButton:pressed { background-color: #44607D; }
+QTimeEdit {
+    background-color: #3D424D;
+    border: 1px solid #4D5462;
+    border-radius: 6px;
+    padding: 6px;
+    color: #E0DDD8;
+}
+"""
+
+
 class SettingsDialog(QDialog):
     """设置对话框"""
 
     def __init__(self, parent=None):
         super().__init__(parent)
         self.settings = AppSettings()
+
+        # 显式设置对话框样式，确保背景色生效
+        self.setStyleSheet(_SETTINGS_DARK if _is_dark_mode() else _SETTINGS_LIGHT)
+
         self._setup_ui()
         self._load_settings()
 
